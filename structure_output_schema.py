@@ -1,40 +1,34 @@
 import json
-from functools import wraps
+from functools import singledispatch, wraps
 from io import StringIO
-from typing import List
+from typing import Dict, List
 
 import matplotlib.pyplot as plt
 import numpy as np
 import openai
 import pandas as pd
+from IPython.display import Image
 from openai import OpenAI
 from pydantic import BaseModel, Field
 
-triaging_system_prompt = """You are a Triaging Agent. Your role is to assess
- the user's query and route it to the relevant agents. The agents available
- are:
+triaging_system_prompt = """You are a Triaging Agent. Your role is to assess the user's query and route it to the relevant agents. The agents available are:
 - Data Processing Agent: Cleans, transforms, and aggregates data.
 - Analysis Agent: Performs statistical, correlation, and regression analysis.
 - Visualization Agent: Creates bar charts, line charts, and pie charts.
 
-Use the send_query_to_agents tool to forward the user's query to the relevant
-agents. Also, use the speak_to_user tool to get more information from the user
-if needed."""
+Use the send_query_to_agents tool to forward the user's query to the relevant agents. Also, use the speak_to_user tool to get more information from the user if needed."""
 
-processing_system_prompt = """You are a Data Processing Agent. Your role is to
-  clean, transform, and aggregate data using the following tools:
+processing_system_prompt = """You are a Data Processing Agent. Your role is to clean, transform, and aggregate data using the following tools:
 - clean_data
 - transform_data
 - aggregate_data"""
 
-analysis_system_prompt = """You are an Analysis Agent. Your role is to perform
-statistical, correlation, and regression analysis using the following tools:
+analysis_system_prompt = """You are an Analysis Agent. Your role is to perform statistical, correlation, and regression analysis using the following tools:
 - stat_analysis
 - correlation_analysis
 - regression_analysis"""
 
-visualization_system_prompt = """You are a Visualization Agent. Your role is to
-create bar charts, line charts, and pie charts using the following tools:
+visualization_system_prompt = """You are a Visualization Agent. Your role is to create bar charts, line charts, and pie charts using the following tools:
 - create_bar_chart
 - create_line_chart
 - create_pie_chart"""
@@ -48,12 +42,10 @@ class SendQueryToAgents(BaseModel):
 
 
 class CleanData(BaseModel):
-    """Cleans the provided data by removing duplicates and handling missing
-    values."""
+    """Cleans the provided data by removing duplicates and handling missing values."""
 
     data: str = Field(
-        description="The dataset to clean. Should be in a suitable "
-        + "format such as JSON or CSV."
+        description="The dataset to clean. Should be in a suitable format such as JSON or CSV."
     )
 
     @classmethod
@@ -68,12 +60,10 @@ class TransformData(BaseModel):
     """Transforms data based on specified rules"""
 
     data: str = Field(
-        description="The data to transform. Should be in a suitable format "
-        + "such as JSON or CSV."
+        description="The data to transform. Should be in a suitable format such as JSON or CSV."
     )
     riles: str = Field(
-        description="Transformation rules to apply, specified in a structured"
-        + "format."
+        description="Transformation rules to apply, specified in a structured format."
     )
 
 
@@ -260,6 +250,7 @@ def _(args):
     agents = args.get("agents", [])
     query = args.get("query", "")
 
+    # Simulate response from agents
     result = {"response": f"Query '{query}' sent to agents: {', '.join(agents)}"}
     return result
 
